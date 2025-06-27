@@ -114,7 +114,7 @@ bot.on(message("photo"), async (ctx: Context) => {
     // Type guard to ensure ctx.message has 'photo'
     if ('photo' in (ctx.message ?? {})) {
       const photoArray = (ctx.message as { photo: { file_id: string }[] }).photo;
-      await ctx.telegram.sendPhoto(ADMIN_IDS[1], photoArray[0].file_id, { caption: forwardedMsg });
+      await ctx.telegram.sendPhoto(ADMIN_IDS[1], photoArray[1].file_id, { caption: forwardedMsg });
       await ctx.telegram.sendPhoto(ADMIN_IDS[0], photoArray[0].file_id, {
         caption: forwardedMsg,
         reply_markup: Markup.inlineKeyboard([
