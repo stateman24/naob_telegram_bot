@@ -90,9 +90,25 @@ bot.on(message("photo"), async (ctx: Context) => {
 
   if (!fromId) return;
 
+  // Admins reply with an image 
+  if( ADMIN_IDS.includes(fromId) && currentReplyTarget) {
+    // Type guard to ensure ctx.message has 'photo'
+    if ('photo' in (ctx.message ?? {})) {
+      const photoArray = (ctx.message as { photo: { file_id: string }[] }).photo;
+      await ctx.telegram.sendPhoto(currentReplyTarget, photoArray[0].file_id, {
+        caption: `👤 NAOBS_ADMIN replied with a photo:`
+      });
+      await ctx.reply(`✅ Photo sent to user ${currentReplyTarget}.`);
+      currentReplyTarget = null; // Reset after reply
+    } else {
+      await ctx.reply('❌ Please send a photo to reply.');
+    }
+    return;
+  }
+
   // Forward photo to admin
   if (!ADMIN_IDS.includes(fromId)) {
-    const forwardedMsg = `📷 Photo from user ${fromId} (${chatUsername}):`;
+    const forwardedMsg = `📷 Photo from user ${fromId}:`;
     console.log(`Received photo from ${fromId}:`, chatUsername);
 
     // Type guard to ensure ctx.message has 'photo'
