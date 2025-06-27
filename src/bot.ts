@@ -1,5 +1,8 @@
+
 import { Telegraf, Context, Markup } from 'telegraf';
+import { message } from 'telegraf/filters';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const BOT_TOKEN = process.env.BOT_ACCESS_TOKEN;
@@ -18,7 +21,7 @@ if (!ADMIN_IDS || ADMIN_IDS.length === 0) {
 
 const bot = new Telegraf(BOT_TOKEN);
 
-bot.on('message', async (ctx: Context) => {
+bot.on(message("text"), async (ctx: Context) => {
   const fromId = ctx.from?.id;
   const chat = ctx.message?.chat;
   const chatUsername = chat && chat.type === 'private' ? (chat as { username?: string }).username : undefined;
@@ -76,6 +79,32 @@ bot.on('callback_query', async (ctx) => {
 
       await ctx.answerCbQuery('Reply mode enabled');
       await ctx.reply(`✉️ Type your reply — it will be sent to user ${targetId}`);
+    }
+  }
+});
+
+bot.on(message("photo"), async (ctx: Context) => {
+  const fromId = ctx.from?.id;
+  const chat = ctx.message?.chat;
+  const chatUsername = chat && chat.type === 'private' ? (chat as { username?: string }).username : undefined;
+
+  if (!fromId) return;
+
+  // Forward photo to admin
+  if (!ADMIN_IDS.includes(fromId)) {
+    const forwardedMsg = `📷 Photo from user ${fromId} (${chatUsername}):`;
+    console.log(`Received photo from ${fromId}:`, chatUsername);
+
+    // Type guard to ensure ctx.message has 'photo'
+    if ('photo' in (ctx.message ?? {})) {
+      const photoArray = (ctx.message as { photo: { file_id: string }[] }).photo;
+      await ctx.telegram.sendPhoto(ADMIN_IDS[1], photoArray[0].file_id, { caption: forwardedMsg });
+      await ctx.telegram.sendPhoto(ADMIN_IDS[0], photoArray[0].file_id, {
+        caption: forwardedMsg,
+        reply_markup: Markup.inlineKeyboard([
+          [Markup.button.callback('Reply to this user', `reply:${fromId}`)]
+        ]).reply_markup
+      });
     }
   }
 });
