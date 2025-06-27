@@ -50,8 +50,8 @@ bot.on(message("text"), async (ctx: Context) => {
     'text' in (ctx.message ?? {}) ? (ctx.message as { text: string }).text : undefined
   );
 
-    await ctx.telegram.sendMessage(ADMIN_IDS[1], forwardedMsg)
-    await ctx.telegram.sendMessage(ADMIN_IDS[0], forwardedMsg, {
+    await ctx.telegram.sendMessage(ADMIN_IDS[0], forwardedMsg)
+    await ctx.telegram.sendMessage(ADMIN_IDS[1], forwardedMsg, {
       reply_markup: Markup.inlineKeyboard([
         [Markup.button.callback('Reply to this user', `reply:${fromId}`)]
       ]).reply_markup
@@ -114,8 +114,8 @@ bot.on(message("photo"), async (ctx: Context) => {
     // Type guard to ensure ctx.message has 'photo'
     if ('photo' in (ctx.message ?? {})) {
       const photoArray = (ctx.message as { photo: { file_id: string }[] }).photo;
-      await ctx.telegram.sendPhoto(ADMIN_IDS[1], photoArray[1].file_id, { caption: forwardedMsg });
-      await ctx.telegram.sendPhoto(ADMIN_IDS[0], photoArray[0].file_id, {
+      await ctx.telegram.sendPhoto(ADMIN_IDS[1], photoArray[0].file_id, { caption: forwardedMsg });
+      await ctx.telegram.sendPhoto(ADMIN_IDS[0], photoArray[1].file_id, {
         caption: forwardedMsg,
         reply_markup: Markup.inlineKeyboard([
           [Markup.button.callback('Reply to this user', `reply:${fromId}`)]
